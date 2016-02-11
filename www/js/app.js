@@ -7,17 +7,63 @@
 // 'starter.controllers' is found in controllers.js
 var app = angular.module('myNotes', ['ionic', 'starter.controllers', 'starter.services'])
 
+app.config(function($stateProvider, $urlRouterProvider) {
+  $stateProvider.state('list', {
+    url: '/list',
+    templateUrl: 'templates/list.html'
+  });
+
+  $stateProvider.state('edit', {
+    url: '/edit/:noteId',
+    templateUrl: 'templates/edit.html'
+  });
+
+  $urlRouterProvider.otherwise('/list');
+});
+
+var notes = [
+  {
+    id: '1',
+    title: 'First Note',
+    description: 'This is my first note.'
+  },
+  {
+    id: '2',
+    title: 'Second Note',
+    description: 'This is my second note.'
+  }
+];
+
+function getNote (noteId) {
+   for (var i = 0; i < notes.length; i++) {
+     if (notes[i].id === noteId){
+      return notes[i];
+     }
+   }
+   return undefined;
+}
+
+function updateNote (note) {
+   for (var i = 0; i < notes.length; i++) {
+     if (notes[i].id === note.id){
+      notes[i] = note;
+      return;
+     }
+   }
+   return undefined;
+}
+
 app.controller('ListCtrl', function($scope){
-  $scope.notes = [
-    {
-      title: 'First Note',
-      description: 'This is my first note.'
-    },
-    {
-      title: 'Second Note',
-      description: 'This is my second note.'
-    }
-  ];
+  $scope.notes = notes;
+});
+
+app.controller('EditCtrl', function($scope, $state){
+  $scope.note = angular.copy(getNote($state.params.noteId));
+
+  $scope.save = function(){
+    updateNote($scope.note);
+    $state.go('list');
+  };
 });
 
 app.run(function($ionicPlatform) {
@@ -34,18 +80,4 @@ app.run(function($ionicPlatform) {
       StatusBar.styleDefault();
     }
   });
-})
-
-app.config(function($stateProvider, $urlRouterProvider) {
-  $stateProvider.state('list', {
-    url: '/list',
-    templateUrl: 'templates/list.html'
-  });
-
-  $stateProvider.state('edit', {
-    url: '/edit',
-    templateUrl: 'templates/edit.html'
-  });
-
-  $urlRouterProvider.otherwise('/list');
 });
