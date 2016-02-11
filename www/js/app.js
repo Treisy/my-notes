@@ -5,7 +5,7 @@
 // the 2nd parameter is an array of 'requires'
 // 'starter.services' is found in services.js
 // 'starter.controllers' is found in controllers.js
-var app = angular.module('myNotes', ['ionic', 'starter.controllers', 'starter.services'])
+var app = angular.module('myNotes', ['ionic', 'myNotes.notestore'])
 
 app.config(function($stateProvider, $urlRouterProvider) {
   $stateProvider.state('list', {
@@ -28,36 +28,11 @@ app.config(function($stateProvider, $urlRouterProvider) {
   $urlRouterProvider.otherwise('/list');
 });
 
-var notes = [];
-
-function getNote (noteId) {
-   for (var i = 0; i < notes.length; i++) {
-     if (notes[i].id === noteId){
-      return notes[i];
-     }
-   }
-   return undefined;
-}
-
-function updateNote (note) {
-   for (var i = 0; i < notes.length; i++) {
-     if (notes[i].id === note.id){
-      notes[i] = note;
-      return;
-     }
-   }
-   return undefined;
-}
-
-function createNote (note) {
-   notes.push(note);
-}
-
-app.controller('ListCtrl', function($scope){
-  $scope.notes = notes;
+app.controller('ListCtrl', function($scope, NoteStore){
+  $scope.notes = NoteStore.list();
 });
 
-app.controller('AddCtrl', function($scope, $state){
+app.controller('AddCtrl', function($scope, $state, NoteStore){
   $scope.note =  {
     id: new Date().getTime().toString(),
     title: '',
@@ -65,16 +40,16 @@ app.controller('AddCtrl', function($scope, $state){
   };
 
   $scope.save = function(){
-    createNote($scope.note);
+    NoteStore.create($scope.note);
     $state.go('list');
   };
 });
 
-app.controller('EditCtrl', function($scope, $state){
-  $scope.note = angular.copy(getNote($state.params.noteId));
+app.controller('EditCtrl', function($scope, $state, NoteStore){
+  $scope.note = angular.copy(NoteStore.get($state.params.noteId));
 
   $scope.save = function(){
-    updateNote($scope.note);
+    NoteStore.update($scope.note);
     $state.go('list');
   };
 });
